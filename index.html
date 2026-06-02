@@ -695,8 +695,9 @@
 
     function revealBias() {
       const items = [
-        { word: "she", prob: 80 },
-        { word: "he", prob: 20 }
+        { word: "She", prob: 84 },
+        { word: "He", prob: 15 },
+        { word: "They", prob: 1 }
       ];
       document.getElementById("biasResult").innerHTML = `<h3>🤖 AI Prediction</h3>${probabilityRows(items)}`;
       document.getElementById("biasResult").classList.remove("hidden");
