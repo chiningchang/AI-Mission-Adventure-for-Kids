@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Mission Adventure for Kids</title>
+  <style>
+    :root {
+      --bg1: #fff7d6;
+      --bg2: #dff7ff;
+      --card: #ffffff;
+      --ink: #243447;
+      --muted: #5c6b7a;
+      --accent: #6c63ff;
+      --accent2: #ff9f1c;
+      --good: #2ec4b6;
+      --pink: #ff6b9a;
+      --shadow: 0 12px 30px rgba(36, 52, 71, 0.16);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Comic Sans MS", "Trebuchet MS", Arial, sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at top left, #ffe6f2, transparent 30%),
+                  radial-gradient(circle at top right, #e3f9ff, transparent 35%),
+                  linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px 16px 70px;
+    }
+
+    header {
+      text-align: center;
+      padding: 28px 18px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 4px solid #fff;
+      border-radius: 34px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      margin: 0 0 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      margin: 0 auto;
+      max-width: 720px;
+      font-size: 1.2rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .robot {
+      display: inline-block;
+      animation: bob 2.5s ease-in-out infinite;
+      font-size: 3.5rem;
+      margin-bottom: 4px;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .progress-card {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      padding: 14px;
+      border-radius: 22px;
+      box-shadow: 0 6px 18px rgba(36, 52, 71, 0.12);
+      margin-bottom: 22px;
+    }
+
+    .progress-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .bar {
+      height: 18px;
+      background: #e8eef5;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 2px solid #fff;
+    }
+
+    .bar-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--good), var(--accent), var(--pink));
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    .mission {
+      display: none;
+      background: var(--card);
+      border: 4px solid #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 26px;
+      margin: 22px 0;
+      min-height: 480px;
+    }
+
+    .mission.active { display: block; }
+
+    .mission-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #f0efff;
+      color: #4b44c9;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: clamp(1.7rem, 3.5vw, 2.6rem);
+      margin: 8px 0 8px;
+    }
+
+    .mission p {
+      font-size: 1.12rem;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .sentence-box {
+      background: #f8fbff;
+      border: 3px dashed #b7d9ff;
+      border-radius: 22px;
+      padding: 22px;
+      margin: 18px 0;
+      font-size: clamp(1.5rem, 4vw, 2.3rem);
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    button {
+      border: none;
+      border-radius: 18px;
+      padding: 15px 18px;
+      font-size: 1.05rem;
+      font-weight: 900;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 6px 0 rgba(36, 52, 71, 0.18);
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease;
+    }
+
+    button:hover { transform: translateY(-2px); }
+    button:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(36, 52, 71, 0.18); }
+
+    .choice-btn { background: #fff0c7; color: #744c00; }
+    .choice-btn.selected { background: var(--accent2); color: white; }
+
+    .primary {
+      background: var(--accent);
+      color: #fff;
+      margin-top: 12px;
+    }
+
+    .secondary {
+      background: #e8eef5;
+      color: var(--ink);
+    }
+
+    .next {
+      background: var(--good);
+      color: white;
+    }
+
+    .hidden { display: none !important; }
+
+    .result {
+      background: #f7f3ff;
+      border-radius: 22px;
+      padding: 18px;
+      margin: 18px 0;
+      border: 3px solid #e1d9ff;
+    }
+
+    .prob-row {
+      display: grid;
+      grid-template-columns: 130px 1fr 60px;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0;
+      font-weight: 900;
+    }
+
+    .prob-bar {
+      height: 20px;
+      background: #e7e9f3;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .prob-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent2), var(--pink));
+      border-radius: 999px;
+      transition: width 0.5s ease;
+    }
+
+    .takeaway {
+      margin: 18px 0;
+      padding: 18px;
+      border-radius: 22px;
+      background: #e9fff9;
+      border: 3px solid #b6f1e6;
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: #137d73;
+    }
+
+    .vocab-card {
+      margin: 18px 0;
+      padding: 20px;
+      border-radius: 24px;
+      background: #e9fff9;
+      border: 4px solid #b6f1e6;
+      color: #137d73;
+      box-shadow: 0 8px 0 rgba(46, 196, 182, 0.18);
+    }
+
+    .vocab-card .vocab-label {
+      display: inline-block;
+      background: #137d73;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .vocab-card h3 {
+      margin: 4px 0 8px;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      color: #0f615a;
+    }
+
+    .vocab-card p, .vocab-card li {
+      color: #176e66;
+      font-size: 1.12rem;
+      line-height: 1.5;
+      font-weight: 800;
+    }
+
+    .vocab-card ul {
+      margin: 10px 0 0;
+      padding-left: 24px;
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .slider-wrap {
+      background: #f8fbff;
+      border-radius: 24px;
+      padding: 20px;
+      border: 3px solid #d7ecff;
+      margin: 18px 0;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .temp-labels {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 900;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .big-output {
+      text-align: center;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 900;
+      background: #fff4fb;
+      border: 3px solid #ffd0e6;
+      border-radius: 24px;
+      padding: 24px;
+      margin: 18px 0;
+      min-height: 100px;
+      display: grid;
+      place-items: center;
+    }
+
+    .token { display: inline-block; margin: 4px; padding: 8px 12px; border-radius: 14px; background: #fff0c7; }
+
+    .certificate {
+      text-align: center;
+      background: linear-gradient(135deg, #fff7d6, #e9fff9);
+      border: 6px solid #ffd166;
+      border-radius: 28px;
+      padding: 28px;
+      margin-top: 18px;
+    }
+
+    .badge {
+      font-size: 4rem;
+      margin: 8px 0;
+    }
+
+    .checklist {
+      text-align: left;
+      display: inline-block;
+      font-size: 1.25rem;
+      line-height: 1.8;
+      font-weight: 900;
+    }
+
+    .credit {
+      text-align: center;
+      margin-top: 24px;
+      padding: 14px 18px;
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.65);
+      border: 3px solid #fff;
+      border-radius: 20px;
+      box-shadow: 0 6px 16px rgba(36, 52, 71, 0.08);
+    }
+
+    .temp-status {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 900;
+      margin-top: 12px;
+      color: #4b44c9;
+    }
+
+    .confetti {
+      position: fixed;
+      top: -20px;
+      font-size: 1.8rem;
+      animation: fall 2.3s linear forwards;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(720deg); opacity: 0.2; }
+    }
+
+    @media (max-width: 640px) {
+      .mission { padding: 18px; }
+      .prob-row { grid-template-columns: 90px 1fr 48px; font-size: 0.95rem; }
+      .progress-title { font-size: 0.92rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="robot">🤖</div>
+      <h1>AI Mission Adventure</h1>
+      <p class="subtitle">Help Robo learn how AI thinks! Complete each mission, unlock the next level, and become an AI Explorer.</p>
+      <button class="primary" onclick="startGame()">Start Mission 🚀</button>
+    </header>
+
+    <div class="progress-card">
+      <div class="progress-title">
+        <span id="levelName">Ready to start</span>
+        <span id="levelCount">0 / 6</span>
+      </div>
+      <div class="bar"><div id="barFill" class="bar-fill"></div></div>
+    </div>
+
+    <section id="mission0" class="mission active">
+      <span class="mission-tag">🚀 Welcome</span>
+      <h2>Robo needs your help!</h2>
+      <p>Robo is learning how AI makes sentences. Your job is to play little games and teach Robo what AI can and cannot do.</p>
+      <div class="sentence-box">Can you become an AI Explorer?</div>
+      <div class="vocab-card">
+        <span class="vocab-label">Today's AI Super Words</span>
+        <h3>Prediction · Temperature · Bias · Hallucination</h3>
+        <p>Finish the missions to learn 5 big AI ideas in kid-friendly ways.</p>
+      </div>
+      <div class="nav-row"><span></span><button class="next" onclick="goToMission(1)">Mission 1 →</button></div>
+    </section>
+
+    <section id="mission1" class="mission">
+      <span class="mission-tag">🎯 Mission 1</span>
+      <h2>Be the AI</h2>
+      <p>Choose the word you think AI would pick next.</p>
+      <div class="sentence-box">The dog chased the _____</div>
+      <div class="choices" id="guessChoices"></div>
+      <button class="primary" onclick="revealGuess()">Reveal AI Guess</button>
+      <div id="guessResult" class="result hidden"></div>
+      <div id="guessTakeaway" class="vocab-card hidden">
+        <span class="vocab-label">AI Vocabulary Card</span>
+        <h3>Prediction</h3>
+        <p><strong>Prediction</strong> means making a guess about what comes next.</p>
+        <p>AI predicts the next word by looking for patterns it has seen before.</p>
+      </div>
+      <div class="nav-row"><button class="secondary" onclick="goToMission(0)">← Back</button><button id="next1" class="next hidden" onclick="goToMission(2)">Mission 2 →</button></div>
+    </section>
+
+    <section id="mission2" class="mission">
+      <span class="mission-tag">🧱 Mission 2</span>
+      <h2>Build a Sentence</h2>
+      <p>AI often builds text one small piece at a time. Pick a word, then keep going!</p>
+      <div class="sentence-box" id="buildSentence">I like _____</div>
+      <div class="choices" id="buildChoices"></div>
+      <div id="buildResult" class="result hidden"></div>
+      <div id="buildTakeaway" class="vocab-card hidden">
+        <span class="vocab-label">AI Vocabulary Card</span>
+        <h3>Next-Word Prediction</h3>
+        <p>AI does not write a whole paragraph all at once.</p>
+        <p>It often builds text by choosing one word or small word piece at a time.</p>
+      </div>
+      <div class="nav-row"><button class="secondary" onclick="goToMission(1)">← Back</button><button id="next2" class="next hidden" onclick="goToMission(3)">Mission 3 →</button></div>
+    </section>
+
+    <section id="mission3" class="mission">
+      <span class="mission-tag">🌡️ Mission 3</span>
+      <h2>Temperature Playground</h2>
+      <p>Move the slider. Watch AI go from safe to silly!</p>
+      <div class="slider-wrap">
+        <input id="tempSlider" type="range" min="0" max="100" value="0" oninput="updateTemperature()" />
+        <div class="temp-labels"><span>🧊 Safe</span><span>😄 Creative</span><span>🤪 Silly</span></div>
+        <div class="temp-status" id="tempStatus">Temperature: 0 · Very safe</div>
+      </div>
+      <div class="big-output" id="tempOutput">The cat sat on the mat.</div>
+      <div class="result" id="tempProb"></div>
+      <div class="vocab-card">
+        <span class="vocab-label">AI Vocabulary Card</span>
+        <h3>Temperature</h3>
+        <p><strong>Temperature</strong> controls how creative AI becomes.</p>
+        <ul>
+          <li>Low temperature: safer and more predictable.</li>
+          <li>High temperature: more creative, but sometimes sillier.</li>
+        </ul>
+      </div>
+      <div class="nav-row"><button class="secondary" onclick="goToMission(2)">← Back</button><button class="next" onclick="goToMission(4)">Mission 4 →</button></div>
+    </section>
+
+    <section id="mission4" class="mission">
+      <span class="mission-tag">⚖️ Mission 4</span>
+      <h2>Spot the Bias</h2>
+      <p>Sometimes AI learns unfair patterns from people. Can you spot it?</p>
+      <div class="sentence-box">The nurse walked into the room. _____ smiled.</div>
+      <button class="primary" onclick="revealBias()">Show AI Prediction</button>
+      <div id="biasResult" class="result hidden"></div>
+      <div id="biasQuestion" class="vocab-card hidden">
+        <span class="vocab-label">AI Vocabulary Card</span>
+        <h3>Bias</h3>
+        <p><strong>Bias</strong> means favoring one idea or group over another.</p>
+        <p>AI learns from human data. If the data contains unfair patterns, AI may learn them too.</p>
+      </div>
+      <div class="nav-row"><button class="secondary" onclick="goToMission(3)">← Back</button><button id="next4" class="next hidden" onclick="goToMission(5)">Mission 5 →</button></div>
+    </section>
+
+    <section id="mission5" class="mission">
+      <span class="mission-tag">🕵️ Mission 5</span>
+      <h2>Catch AI Mistakes</h2>
+      <p>Sometimes AI gives information that sounds correct but is actually wrong. That is why we should validate AI answers.</p>
+      <div class="sentence-box">Polar bears live on the Moon.</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="mistakeAnswer(false)">Sounds true</button>
+        <button class="choice-btn" onclick="mistakeAnswer(true)">That is a mistake!</button>
+      </div>
+      <div id="mistakeResult" class="result hidden"></div>
+      <div id="mistakeTakeaway" class="vocab-card hidden">
+        <span class="vocab-label">AI Vocabulary Card</span>
+        <h3>Hallucination</h3>
+        <p>A <strong>hallucination</strong> happens when AI gives information that sounds correct but is actually wrong.</p>
+        <p>That is why we should validate AI answers.</p>
+      </div>
+      <div class="nav-row"><button class="secondary" onclick="goToMission(4)">← Back</button><button id="next5" class="next hidden" onclick="goToMission(6)">Finish →</button></div>
+    </section>
+
+    <section id="mission6" class="mission">
+      <span class="mission-tag">🏆 Finished</span>
+      <h2>Mission Complete!</h2>
+      <div class="certificate">
+        <div class="badge">🏅</div>
+        <h2>AI Explorer Certificate</h2>
+        <p>You learned 5 AI Super Words!</p>
+        <div class="checklist">
+          ✅ <strong>Prediction:</strong> AI makes guesses<br />
+          ✅ <strong>Next-Word Prediction:</strong> AI builds one word at a time<br />
+          ✅ <strong>Temperature:</strong> AI can be safer or more creative<br />
+          ✅ <strong>Bias:</strong> AI can learn unfair patterns<br />
+          ✅ <strong>Hallucination:</strong> That is why we should validate AI answers
+        </div>
+      </div>
+      <div class="nav-row"><button class="secondary" onclick="goToMission(5)">← Back</button><button class="primary" onclick="restartGame()">Play Again 🔁</button></div>
+    </section>
+
+    <div class="credit">By Dr. Nick Chang (changc10@vcu.edu)</div>
+  </div>
+
+  <script>
+    const missions = [
+      "Welcome", "Mission 1: Be the AI", "Mission 2: Build a Sentence",
+      "Mission 3: Temperature Playground", "Mission 4: Spot the Bias",
+      "Mission 5: Catch AI Mistakes", "Mission Complete"
+    ];
+    let currentMission = 0;
+    let buildStep = 0;
+    let builtWords = [];
+
+    const guessOptions = [
+      { word: "cat", prob: 75 },
+      { word: "pizza", prob: 10 },
+      { word: "moon", prob: 8 },
+      { word: "refrigerator", prob: 7 }
+    ];
+
+    const buildOptions = [
+      ["Pokémon", "pizza", "soccer", "books"],
+      ["because", "with", "when", "after"],
+      ["they are fun", "it is tasty", "I play outside", "stories are magical"]
+    ];
+
+    function startGame() { 
+  restartGame(); // Resets all the data, scores, and choices
+  goToMission(1); // Sends the user straight to Mission 1 instead of Mission 0
+}
+
+    function goToMission(n) {
+      document.querySelectorAll(".mission").forEach(m => m.classList.remove("active"));
+      document.getElementById("mission" + n).classList.add("active");
+      currentMission = n;
+      updateProgress();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (n === 3) updateTemperature();
+      if (n === 6) confetti();
+    }
+
+    function updateProgress() {
+      const percent = (currentMission / 6) * 100;
+      document.getElementById("barFill").style.width = percent + "%";
+      document.getElementById("levelName").textContent = missions[currentMission];
+      document.getElementById("levelCount").textContent = currentMission + " / 6";
+    }
+
+    function renderGuessChoices() {
+      const box = document.getElementById("guessChoices");
+      box.innerHTML = "";
+      guessOptions.forEach(o => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn";
+        btn.textContent = o.word;
+        btn.onclick = () => {
+          document.querySelectorAll("#guessChoices .choice-btn").forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+        };
+        box.appendChild(btn);
+      });
+    }
+
+    function probabilityRows(items) {
+      return items.map(o => `
+        <div class="prob-row">
+          <span>${o.word}</span>
+          <div class="prob-bar"><div class="prob-fill" style="width:${o.prob}%"></div></div>
+          <span>${o.prob}%</span>
+        </div>
+      `).join("");
+    }
+
+    function revealGuess() {
+      const result = document.getElementById("guessResult");
+      result.innerHTML = `<h3>🤖 AI Prediction</h3>${probabilityRows(guessOptions)}`;
+      result.classList.remove("hidden");
+      document.getElementById("guessTakeaway").classList.remove("hidden");
+      document.getElementById("next1").classList.remove("hidden");
+    }
+
+    function renderBuildChoices() {
+      const choices = document.getElementById("buildChoices");
+      choices.innerHTML = "";
+      buildOptions[buildStep].forEach(word => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn";
+        btn.textContent = word;
+        btn.onclick = () => chooseBuild(word);
+        choices.appendChild(btn);
+      });
+    }
+
+    function chooseBuild(word) {
+      builtWords.push(word);
+      buildStep++;
+      const sentence = document.getElementById("buildSentence");
+      if (buildStep === 1) sentence.textContent = `I like ${builtWords[0]} _____`;
+      if (buildStep === 2) sentence.textContent = `I like ${builtWords[0]} ${builtWords[1]} _____`;
+      if (buildStep === 3) {
+        const final = `I like ${builtWords[0]} ${builtWords[1]} ${builtWords[2]}.`;
+        sentence.textContent = final;
+        document.getElementById("buildChoices").innerHTML = "";
+        document.getElementById("buildResult").innerHTML = `<h3>🎉 Your AI sentence</h3><p><strong>${final}</strong></p>`;
+        document.getElementById("buildResult").classList.remove("hidden");
+        document.getElementById("buildTakeaway").classList.remove("hidden");
+        document.getElementById("next2").classList.remove("hidden");
+      } else {
+        renderBuildChoices();
+      }
+    }
+
+    function resetBuild() {
+      buildStep = 0;
+      builtWords = [];
+      document.getElementById("buildSentence").textContent = "I like _____";
+      document.getElementById("buildResult").classList.add("hidden");
+      document.getElementById("buildTakeaway").classList.add("hidden");
+      document.getElementById("next2").classList.add("hidden");
+      renderBuildChoices();
+    }
+
+    const temperatureScenes = [
+      { max: 10, label: "Very safe", emoji: "🧊", text: "The cat sat on the mat.", data: [
+        { word: "the mat", prob: 94 }, { word: "the chair", prob: 4 }, { word: "the sofa", prob: 1 }, { word: "a pizza", prob: 1 }
+      ]},
+      { max: 20, label: "Safe", emoji: "🧊", text: "The cat sat on the chair.", data: [
+        { word: "the chair", prob: 82 }, { word: "the mat", prob: 12 }, { word: "the sofa", prob: 4 }, { word: "a pizza", prob: 2 }
+      ]},
+      { max: 30, label: "Still predictable", emoji: "🙂", text: "The cat sat on the sofa.", data: [
+        { word: "the sofa", prob: 68 }, { word: "the chair", prob: 16 }, { word: "the mat", prob: 11 }, { word: "a pizza", prob: 5 }
+      ]},
+      { max: 40, label: "A little creative", emoji: "🙂", text: "The cat sat on a skateboard.", data: [
+        { word: "a skateboard", prob: 54 }, { word: "a tiny robot", prob: 24 }, { word: "a rocket ship", prob: 13 }, { word: "a pizza", prob: 9 }
+      ]},
+      { max: 50, label: "Balanced", emoji: "😄", text: "The cat sat on a tiny robot.", data: [
+        { word: "a tiny robot", prob: 42 }, { word: "a skateboard", prob: 28 }, { word: "a rocket ship", prob: 18 }, { word: "a pizza", prob: 12 }
+      ]},
+      { max: 60, label: "Creative", emoji: "😄", text: "The cat sat on a rocket ship.", data: [
+        { word: "a rocket ship", prob: 34 }, { word: "a tiny robot", prob: 27 }, { word: "a skateboard", prob: 22 }, { word: "a moon chair", prob: 17 }
+      ]},
+      { max: 70, label: "Very creative", emoji: "🚀", text: "The cat sat on a dinosaur skateboard.", data: [
+        { word: "a dinosaur skateboard", prob: 30 }, { word: "a rocket ship", prob: 26 }, { word: "a moon chair", prob: 23 }, { word: "a cloud made of pizza", prob: 21 }
+      ]},
+      { max: 80, label: "Silly", emoji: "🤪", text: "The cat sat on a cloud made of pizza.", data: [
+        { word: "a cloud made of pizza", prob: 28 }, { word: "a dinosaur skateboard", prob: 25 }, { word: "a flying pizza spaceship", prob: 24 }, { word: "a moon taco", prob: 23 }
+      ]},
+      { max: 90, label: "Very silly", emoji: "🤪", text: "The cat sat on a flying pizza spaceship.", data: [
+        { word: "a flying pizza spaceship", prob: 26 }, { word: "a cloud made of pizza", prob: 25 }, { word: "a dinosaur skateboard", prob: 25 }, { word: "a rainbow taco rocket", prob: 24 }
+      ]},
+      { max: 100, label: "Wild", emoji: "🌈", text: "The cat sat on a rainbow taco rocket from Mars.", data: [
+        { word: "a rainbow taco rocket from Mars", prob: 25 }, { word: "a banana spaceship", prob: 25 }, { word: "a dancing moon", prob: 25 }, { word: "a spaghetti volcano", prob: 25 }
+      ]}
+    ];
+
+    function updateTemperature() {
+      const value = Number(document.getElementById("tempSlider").value);
+      const scene = temperatureScenes.find(s => value <= s.max) || temperatureScenes[temperatureScenes.length - 1];
+      document.getElementById("tempOutput").textContent = scene.text;
+      document.getElementById("tempStatus").textContent = `${scene.emoji} Temperature: ${value} · ${scene.label}`;
+      document.getElementById("tempProb").innerHTML = `<h3>Possible sentence endings</h3>${probabilityRows(scene.data)}`;
+    }
+
+    function revealBias() {
+      const items = [
+        { word: "she", prob: 80 },
+        { word: "he", prob: 20 }
+      ];
+      document.getElementById("biasResult").innerHTML = `<h3>🤖 AI Prediction</h3>${probabilityRows(items)}`;
+      document.getElementById("biasResult").classList.remove("hidden");
+      document.getElementById("biasQuestion").classList.remove("hidden");
+      document.getElementById("next4").classList.remove("hidden");
+    }
+
+    function mistakeAnswer(isCorrect) {
+      const result = document.getElementById("mistakeResult");
+      if (isCorrect) {
+        result.innerHTML = "<h3>✅ You caught it!</h3><p>Polar bears live in the Arctic, not on the Moon.</p>";
+      } else {
+        result.innerHTML = "<h3>Good try!</h3><p>This sentence is wrong. Polar bears live in the Arctic.</p>";
+      }
+      result.classList.remove("hidden");
+      document.getElementById("mistakeTakeaway").classList.remove("hidden");
+      document.getElementById("next5").classList.remove("hidden");
+    }
+
+    function confetti() {
+      const pieces = ["🎉", "⭐", "🚀", "🤖", "🏅", "✨"];
+      for (let i = 0; i < 30; i++) {
+        const span = document.createElement("span");
+        span.className = "confetti";
+        span.textContent = pieces[Math.floor(Math.random() * pieces.length)];
+        span.style.left = Math.random() * 100 + "vw";
+        span.style.animationDelay = Math.random() * 0.7 + "s";
+        document.body.appendChild(span);
+        setTimeout(() => span.remove(), 3200);
+      }
+    }
+
+    function restartGame() {
+      document.getElementById("guessResult").classList.add("hidden");
+      document.getElementById("guessTakeaway").classList.add("hidden");
+      document.getElementById("next1").classList.add("hidden");
+      document.querySelectorAll("#guessChoices .choice-btn").forEach(b => b.classList.remove("selected"));
+
+      document.getElementById("biasResult").classList.add("hidden");
+      document.getElementById("biasQuestion").classList.add("hidden");
+      document.getElementById("next4").classList.add("hidden");
+
+      document.getElementById("mistakeResult").classList.add("hidden");
+      document.getElementById("mistakeTakeaway").classList.add("hidden");
+      document.getElementById("next5").classList.add("hidden");
+
+      document.getElementById("tempSlider").value = 0;
+      updateTemperature();
+      resetBuild();
+      goToMission(0);
+    }
+
+    renderGuessChoices();
+    resetBuild();
+    updateProgress();
+  </script>
+</body>
+</html>
